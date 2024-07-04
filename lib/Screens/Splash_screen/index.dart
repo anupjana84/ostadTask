@@ -1,5 +1,9 @@
-import 'package:apiinntrigation/Utility/app_color.dart';
+import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
+import 'package:apiinntrigation/Screens/login/index.dart';
+
+import 'package:apiinntrigation/Utility/assets_paths.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,17 +14,36 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
+  void initState() {
+    super.initState();
+    _nextScreen();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      body: BackgroundWidget(
+        child: Center(
+          child: SvgPicture.asset(
+            AssetPaths.logoPath,
+            width: 100,
+            height: 100,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
 
-   return Scaffold(
-     appBar: AppBar(
-       title:  const Text("data"),
-       backgroundColor: AppColors.backgroundColorTwo,
-     ),
-     body: const SafeArea(child: Center(
-       child: Text("data",style: TextStyle(color: AppColors.backgroundColorTwo ),),
-     ),),
-
-   );
+  Future<void> _nextScreen() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SingInScreen(),
+        ),
+      );
+    }
   }
 }
