@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:apiinntrigation/Api/auth_setting.dart';
+import 'package:apiinntrigation/HelperMethod/auth_helper.dart';
 import 'package:apiinntrigation/Models/response_model.dart';
 import 'package:http/http.dart';
 
