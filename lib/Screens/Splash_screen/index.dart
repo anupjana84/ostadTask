@@ -1,4 +1,7 @@
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
+import 'package:apiinntrigation/HelperMethod/auth_helper.dart';
+import 'package:apiinntrigation/Screens/bottomNavigation/index.dart';
+import 'package:apiinntrigation/Screens/forgoPassword/index.dart';
 import 'package:apiinntrigation/Screens/login/index.dart';
 
 import 'package:apiinntrigation/Utility/assets_paths.dart';
@@ -37,11 +40,15 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _nextScreen() async {
     await Future.delayed(const Duration(seconds: 2));
+    bool isLogedInUser = await AuthHelper.checkAuthState();
+    print(isLogedInUser);
     if (mounted) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const SingInScreen(),
+          builder: (context) => isLogedInUser
+              ? const BottoNavigationScreen()
+              : const SingInScreen(),
         ),
       );
     }

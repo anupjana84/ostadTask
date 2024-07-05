@@ -1,13 +1,13 @@
 import 'package:apiinntrigation/Models/user_data.dart';
 
-class AutModel {
+class AuthModel {
   String? status;
   String? token;
   UserModel? userModel;
 
-  AutModel({this.status, this.token, this.userModel});
+  AuthModel({this.status, this.token, this.userModel});
 
-  AutModel.fromJson(Map<String, dynamic> json) {
+  AuthModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     token = json['token'];
     userModel = json['data'] != null ? UserModel.fromJson(json['data']) : null;

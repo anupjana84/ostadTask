@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:apiinntrigation/HelperMethod/auth_helper.dart';
 import 'package:apiinntrigation/Models/response_model.dart';
+import 'package:apiinntrigation/Screens/login/index.dart';
+import 'package:apiinntrigation/main.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
 class ApiCall {
@@ -11,13 +14,13 @@ class ApiCall {
           await get(Uri.parse(url), headers: {"token": AuthHelper.accessToken});
       if (response.statusCode == 200) {
         final resData = jsonDecode(response.body);
-        print(resData);
-        print("resData");
+
         return NetworkResponse(
             statusCode: response.statusCode,
             isSuccess: true,
             responseData: resData);
       } else if (response.statusCode == 401) {
+        logout();
         return NetworkResponse(
           statusCode: response.statusCode,
           isSuccess: false,
@@ -45,14 +48,14 @@ class ApiCall {
           });
       if (response.statusCode == 200 || response.statusCode == 201) {
         final resData = jsonDecode(response.body);
-        print(resData['data']);
-        print(resData);
 
         return NetworkResponse(
-            statusCode: response.statusCode,
-            isSuccess: true,
-            responseData: resData);
+          statusCode: response.statusCode,
+          isSuccess: true,
+          responseData: resData,
+        );
       } else if (response.statusCode == 401) {
+        logout();
         return NetworkResponse(
           statusCode: response.statusCode,
           isSuccess: false,
@@ -67,5 +70,13 @@ class ApiCall {
       return NetworkResponse(
           statusCode: -1, isSuccess: false, errorMessage: e.toString());
     }
+  }
+
+  static Future<void> logout() async {
+    await AuthHelper.clearUserData();
+    Navigator.pushAndRemoveUntil(
+        MyApp.navigatorKey.currentContext!,
+        MaterialPageRoute(builder: (context) => const SingInScreen()),
+        (route) => false);
   }
 }

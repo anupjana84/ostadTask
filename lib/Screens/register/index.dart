@@ -122,7 +122,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _registerApiCall() async {
-    print("re");
     Map<String, dynamic> registerData = {
       "email": _emailTextController.text.trim(),
       "firstName": _fNameTextController.text.trim(),
@@ -131,7 +130,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       "password": _passwordTextController.text.trim(),
       "photo": ""
     };
-    print(registerData);
+
     NetworkResponse response =
         await ApiCall.postApiCall(Api.register, body: registerData);
     print("${response.isSuccess} ${response.statusCode}");

@@ -1,7 +1,10 @@
 import 'package:apiinntrigation/Api/api_call.dart';
 import 'package:apiinntrigation/Api/index.dart';
+import 'package:apiinntrigation/HelperMethod/auth_helper.dart';
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
+import 'package:apiinntrigation/Models/auth_data.dart';
 import 'package:apiinntrigation/Models/response_model.dart';
+import 'package:apiinntrigation/Screens/bottomNavigation/index.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
@@ -148,18 +151,31 @@ class _SingInScreenState extends State<SingInScreen> {
 
     final NetworkResponse response =
         await ApiCall.postApiCall(Api.login1, body: loginData);
+
     isLoding = false;
-    print(response.errorMessage);
+
     if (mounted) {
       setState(() {});
     }
 
     if (response.isSuccess) {
       _clearFormField();
+      AuthModel authModel = AuthModel.fromJson(response.responseData);
+
+      await AuthHelper.userSave(authModel.userModel!);
+      await AuthHelper.tokenSave(authModel.token!);
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const BottoNavigationScreen(),
+          ),
+        );
+      }
     } else {
       if (mounted) {
         showSnackMessage(
-            context, response.errorMessage ?? 'Wrong credential', true);
+            context, response.errorMessage ?? 'Credential wrong', true);
       }
     }
   }
