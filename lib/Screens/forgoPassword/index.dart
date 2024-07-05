@@ -21,7 +21,7 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
         child: Center(
           child: ElevatedButton(
               onPressed: () {
-                _getData();
+                // _getData();
               },
               child: const Text("data")),
         ),
@@ -29,8 +29,8 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
     );
   }
 
-  Future<void> _getData() async {
-    NetworkResponse res = await ApiCall.getApiCall(Api.completTask);
-    print(res);
-  }
+  // Future<void> _getData() async {
+  //   NetworkResponse res = await ApiCall.getApiCall(Api.completTask);
+  //   // print(res);
+  // }
 }

@@ -17,10 +17,10 @@ class BottoNavigationScreen extends StatefulWidget {
 class _BottoNavigationScreenState extends State<BottoNavigationScreen> {
   int _selectedIndex = 0;
   final List<Widget> _screen = const [
-    CancelledTaskScreen(),
-    CompletedScreen(),
-    InProgressScreen(),
     NewTaskScreen(),
+    CompletedScreen(),
+    CancelledTaskScreen(),
+    InProgressScreen(),
   ];
 
   @override

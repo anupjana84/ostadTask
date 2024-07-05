@@ -133,7 +133,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     NetworkResponse response =
         await ApiCall.postApiCall(Api.register, body: registerData);
-    print("${response.isSuccess} ${response.statusCode}");
+        
   }
 
   Center signText() {
