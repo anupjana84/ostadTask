@@ -133,9 +133,9 @@ class _CreateNewTaskState extends State<CreateNewTask> {
 
       if (mounted) {
         showSnackMessage(context, 'Data Save Successfully', false);
-        Timer(const Duration(seconds: 3), () {
+        Timer(const Duration(seconds: 2), () {
           if (mounted) {
-            Navigator.pop(context);
+            Navigator.pop(context, true);
           }
         });
       }

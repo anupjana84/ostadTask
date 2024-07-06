@@ -20,6 +20,9 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
   List newTaskListCount = [];
   bool _isLodingNewTasks = false;
   bool _isLodingCount = false;
+
+  final Map<String, bool> _isLoadingDeleteMap = {};
+  final Map<String, bool> _isLoadingUpdateMap = {};
   @override
   void initState() {
     super.initState();
@@ -92,24 +95,37 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
               child: Visibility(
                 visible: _isLodingNewTasks == false,
                 replacement: const Center(child: CircularProgressIndicator()),
-                child: ListView.builder(
-                    itemCount: newTaskList.length,
-                    itemBuilder: (context, index) {
-                      final item = newTaskList[index];
-                      final parsedDate =
-                          DateFormat('dd-MM-yyyy').parse(item['createdDate']!);
-                      final formattedDate =
-                          DateFormat('dd/MM/yyyy').format(parsedDate);
-                      return TaskItem(
-                          title:
-                              newTaskList[index]['title'].toUpperCase() ?? '',
-                          description:
-                              newTaskList[index]['description'].toUpperCase() ??
-                                  '',
-                          date: formattedDate,
-                          color: AppColors.cardColorOne,
-                          buttontitle: 'New');
-                    }),
+                child: newTaskList.isEmpty
+                    ? const Center(child: Text('No data found'))
+                    : ListView.builder(
+                        itemCount: newTaskList.length,
+                        itemBuilder: (context, index) {
+                          final item = newTaskList[index];
+                          final parsedDate = DateFormat('dd-MM-yyyy')
+                              .parse(item['createdDate']!);
+                          final formattedDate =
+                              DateFormat('dd/MM/yyyy').format(parsedDate);
+                          return TaskItem(
+                            title:
+                                newTaskList[index]['title'].toUpperCase() ?? '',
+                            description:
+                                newTaskList[index]['description'] ?? '',
+                            date: formattedDate,
+                            color: AppColors.cardColorOne,
+                            buttontitle: 'New',
+                            onClick: () {
+                              _deleteTask(newTaskList[index]['_id']);
+                            },
+                            deleLoding: _isLoadingDeleteMap[newTaskList[index]
+                                    ['_id']] ??
+                                false,
+                            id: newTaskList[index]['_id'],
+                            onUpdate: _updatStatusTask,
+                            updateLoding: _isLoadingUpdateMap[newTaskList[index]
+                                    ['_id']] ??
+                                false,
+                          );
+                        }),
               ),
             ),
           )
@@ -164,12 +180,71 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     );
   }
 
-  void _creatNewTask() {
-    Navigator.push(
+  void _creatNewTask() async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => const CreateNewTask(),
       ),
     );
+
+    if (result) {
+      _getNewTask();
+      _getTaskCount();
+    }
+  }
+
+  Future<void> _deleteTask(id) async {
+    _isLoadingDeleteMap[id] = true;
+    setState(() {});
+    final api = "${Api.baseUrl}/deleteTask/$id";
+
+    final NetworkResponse response = await ApiCall.getApiCall(api);
+
+    _isLoadingDeleteMap[id] = false;
+
+    if (mounted) {
+      setState(() {});
+    }
+
+    if (response.isSuccess) {
+      if (mounted) {
+        showSnackMessage(context, 'Task Deleted Successfully', false);
+        _getNewTask();
+        _getTaskCount();
+      }
+    } else {
+      if (mounted) {
+        showSnackMessage(
+            context, response.errorMessage ?? 'Data get Fail', true);
+      }
+    }
+  }
+
+  Future<void> _updatStatusTask(id, status) async {
+    _isLoadingUpdateMap[id] = true;
+    setState(() {});
+    final api = "${Api.baseUrl}/updateTaskStatus/$id/$status";
+
+    final NetworkResponse response = await ApiCall.getApiCall(api);
+
+    _isLoadingUpdateMap[id] = false;
+
+    if (mounted) {
+      setState(() {});
+    }
+
+    if (response.isSuccess) {
+      if (mounted) {
+        showSnackMessage(context, 'Task Updated Successfully', false);
+        _getNewTask();
+        _getTaskCount();
+      }
+    } else {
+      if (mounted) {
+        showSnackMessage(
+            context, response.errorMessage ?? 'Data get Fail', true);
+      }
+    }
   }
 }

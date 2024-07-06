@@ -1,10 +1,6 @@
-import 'dart:async';
-
-import 'package:apiinntrigation/Api/index.dart';
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
-import 'package:apiinntrigation/Models/response_model.dart';
+
 import 'package:flutter/material.dart';
-import 'package:apiinntrigation/Api/api_call.dart';
 
 class FogotPasswordScreen extends StatefulWidget {
   const FogotPasswordScreen({super.key});
