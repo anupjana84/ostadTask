@@ -4,27 +4,34 @@ import 'package:apiinntrigation/Api/index.dart';
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
 
 import 'package:apiinntrigation/Models/response_model.dart';
-import 'package:apiinntrigation/Screens/pinVarified/index.dart';
+import 'package:apiinntrigation/Screens/ResetPasswod/index.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
 
 import 'package:apiinntrigation/Utility/app_color.dart';
-import 'package:apiinntrigation/Utility/constants.dart';
 
-class FogotPasswordScreen extends StatefulWidget {
-  const FogotPasswordScreen({super.key});
+import 'package:pin_code_fields/pin_code_fields.dart';
+
+class PinVarificationScreen extends StatefulWidget {
+  final String email;
+
+  const PinVarificationScreen({
+    super.key,
+    required this.email,
+  });
 
   @override
-  State<FogotPasswordScreen> createState() => _FogotPasswordScreenState();
+  State<PinVarificationScreen> createState() => _PinVarificationScreenState();
 }
 
-class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
-  final TextEditingController _emailTextController = TextEditingController();
-  final TextEditingController _passwordTextController = TextEditingController();
+class _PinVarificationScreenState extends State<PinVarificationScreen> {
+  final TextEditingController _pinVarificationController =
+      TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isLoding = false;
+  String pin = '';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,21 +57,22 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
                       style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _emailTextController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(hintText: "email"),
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      validator: (String? value) {
-                        if (value?.trim().isEmpty ?? true) {
-                          return 'Enter your email address';
-                        }
-                        if (AppConstants.emailCheck.hasMatch(value!) == false) {
-                          return 'Enter a valid email address';
-                        }
-                        return null;
-                      },
-                    ),
+                    PinCodeTextField(
+                        appContext: context,
+                        obscureText: false,
+                        animationType: AnimationType.slide,
+                        keyboardType: TextInputType.number,
+                        pinTheme: PinTheme(
+                          shape: PinCodeFieldShape.circle,
+                          activeColor: AppColors.cardColorTwo,
+                        ),
+                        controller: _pinVarificationController,
+                        animationCurve: Curves.bounceIn,
+                        onChanged: (value) {
+                          pin = value;
+                          setState(() {});
+                        },
+                        length: 6),
                     const SizedBox(height: 12),
                     Visibility(
                       visible: isLoding == false,
@@ -79,7 +87,7 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
                           ),
                         ),
                         onPressed: () {
-                          _save();
+                          _submit();
                         },
                         child: const Icon(Icons.arrow_circle_right_outlined),
                       ),
@@ -122,17 +130,11 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
     );
   }
 
-  _save() {
-    if (_formKey.currentState!.validate()) {
-      _submit();
-    }
-  }
-
   Future<void> _submit() async {
     isLoding = true;
     setState(() {});
     final api =
-        "${Api.baseUrl}/RecoverVerifyEmail/${_emailTextController.text.trim()}";
+        "${Api.baseUrl}/RecoverVerifyOTP/${widget.email}/${_pinVarificationController.text.trim()}";
 
     final NetworkResponse response = await ApiCall.getApiCall(api);
 
@@ -143,14 +145,15 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
     }
 
     if (response.isSuccess) {
-      _clearFormField();
+      // _clearFormField();
+
       if (mounted) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => PinVarificationScreen(
-              email: response.responseData['data']['accepted'][0],
-            ),
+            builder: (context) => ResetPassordScreen(
+                email: widget.email,
+                otp: _pinVarificationController.text.trim()),
           ),
         );
       }
@@ -166,15 +169,10 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
     Navigator.pop(context);
   }
 
-  void _clearFormField() {
-    _emailTextController.clear();
-    _passwordTextController.clear();
-  }
-
-  @override
-  void dispose() {
-    _emailTextController.dispose();
-    _passwordTextController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _pinVarificationController.dispose();
+  //   super.dispose();
+  //   //
+  // }
 }

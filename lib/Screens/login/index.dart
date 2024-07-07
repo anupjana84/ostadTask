@@ -115,7 +115,7 @@ class _SingInScreenState extends State<SingInScreen> {
                                 TextSpan(
                                   text: 'Sign Up',
                                   style: const TextStyle(
-                                      color: AppColors.themeColor),
+                                      color: AppColors.cardColorOne),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = _goToSignInButton,
                                 )

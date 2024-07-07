@@ -1,30 +1,47 @@
+import 'dart:async';
+
 import 'package:apiinntrigation/Api/api_call.dart';
 import 'package:apiinntrigation/Api/index.dart';
 
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
 
 import 'package:apiinntrigation/Models/response_model.dart';
-import 'package:apiinntrigation/Screens/pinVarified/index.dart';
-
+import 'package:apiinntrigation/Screens/bottomNavigation/index.dart';
+import 'package:apiinntrigation/Screens/login/index.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
 
 import 'package:apiinntrigation/Utility/app_color.dart';
-import 'package:apiinntrigation/Utility/constants.dart';
 
-class FogotPasswordScreen extends StatefulWidget {
-  const FogotPasswordScreen({super.key});
+class ResetPassordScreen extends StatefulWidget {
+  final String email;
+  final String otp;
+  const ResetPassordScreen({super.key, required this.email, required this.otp});
 
   @override
-  State<FogotPasswordScreen> createState() => _FogotPasswordScreenState();
+  State<ResetPassordScreen> createState() => _ResetPassordScreenState();
 }
 
-class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
-  final TextEditingController _emailTextController = TextEditingController();
+class _ResetPassordScreenState extends State<ResetPassordScreen> {
   final TextEditingController _passwordTextController = TextEditingController();
+  final TextEditingController _cpasswordTextController =
+      TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool isLoding = false;
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a password';
+    }
+    if (value.length < 8) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$').hasMatch(value)) {
+      return 'Password must contain both letters and numbers';
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,25 +59,33 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
                       height: 150,
                     ),
                     Text(
-                      "Your Email Address",
+                      "Set Password",
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text(
-                      "A 6 digit varification pin will send to your email address",
-                      style: Theme.of(context).textTheme.titleSmall,
+                    const Text(
+                      "Minimum length password 8 character with Letter and number combine",
+                      style: TextStyle(fontSize: 14.00),
                     ),
                     const SizedBox(height: 10),
                     TextFormField(
-                      controller: _emailTextController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(hintText: "email"),
+                        obscureText: true,
+                        controller: _passwordTextController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(hintText: "password"),
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: _validatePassword),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      obscureText: true,
+                      controller: _cpasswordTextController,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
+                      decoration:
+                          const InputDecoration(hintText: 'Confirmpassword'),
                       validator: (String? value) {
                         if (value?.trim().isEmpty ?? true) {
-                          return 'Enter your email address';
-                        }
-                        if (AppConstants.emailCheck.hasMatch(value!) == false) {
-                          return 'Enter a valid email address';
+                          return 'Enter your password';
+                        } else if (value != _passwordTextController.text) {
+                          return 'Password does not match';
                         }
                         return null;
                       },
@@ -79,9 +104,12 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
                           ),
                         ),
                         onPressed: () {
-                          _save();
+                          _submit();
                         },
-                        child: const Icon(Icons.arrow_circle_right_outlined),
+                        child: const Text(
+                          "Confirm",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                     const SizedBox(
@@ -102,9 +130,9 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
                                 TextSpan(
                                   text: 'Sign In',
                                   style: const TextStyle(
-                                      color: AppColors.themeColor),
+                                      color: AppColors.cardColorOne),
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap = _goTo,
+                                    ..onTap = _goToSignInButton,
                                 )
                               ],
                             ),
@@ -122,19 +150,26 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
     );
   }
 
-  _save() {
+  _submit() {
     if (_formKey.currentState!.validate()) {
-      _submit();
+      _save();
     }
   }
 
-  Future<void> _submit() async {
+  Future<void> _save() async {
     isLoding = true;
     setState(() {});
-    final api =
-        "${Api.baseUrl}/RecoverVerifyEmail/${_emailTextController.text.trim()}";
+    Map<String, dynamic> data = {
+      'email': widget.email,
+      'OTP': widget.otp,
+      'password': _cpasswordTextController.text,
+    };
 
-    final NetworkResponse response = await ApiCall.getApiCall(api);
+    final NetworkResponse response =
+        await ApiCall.postApiCall(Api.recoverResetPass, body: data);
+
+    print(response.statusCode);
+    print(response.responseData);
 
     isLoding = false;
 
@@ -144,37 +179,41 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
 
     if (response.isSuccess) {
       _clearFormField();
+
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PinVarificationScreen(
-              email: response.responseData['data']['accepted'][0],
-            ),
-          ),
-        );
+        showSnackMessage(context, 'Password updated Successfully', false);
+        Timer(const Duration(seconds: 2), () {
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const SingInScreen()),
+              (route) => false);
+        });
       }
     } else {
       if (mounted) {
         showSnackMessage(
-            context, response.errorMessage ?? ' Email Send fail', true);
+            context, response.errorMessage ?? 'Credential wrong', true);
       }
     }
   }
 
-  void _goTo() {
-    Navigator.pop(context);
+  void _goToSignInButton() {
+    context;
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const SingInScreen()),
+        (route) => false);
   }
 
   void _clearFormField() {
-    _emailTextController.clear();
     _passwordTextController.clear();
+    _cpasswordTextController.clear();
   }
 
   @override
   void dispose() {
-    _emailTextController.dispose();
     _passwordTextController.dispose();
+    _cpasswordTextController.dispose();
     super.dispose();
   }
 }

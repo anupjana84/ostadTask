@@ -34,7 +34,7 @@ class TaskItem extends StatefulWidget {
 
 class _TaskItemState extends State<TaskItem> {
   String dropdownValue = "";
-  List<String> statusList = ['New', 'Progress', 'Completed', 'Cancelled'];
+  List<String> statusList = ['New', 'Completed', 'Cancelled', 'Progress'];
 
   @override
   void initState() {
