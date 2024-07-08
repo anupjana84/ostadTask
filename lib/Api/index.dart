@@ -11,6 +11,7 @@ class Api {
   static const String completedTask = "$baseUrl/listTaskByStatus/Completed";
   static const String cancelledTask = "$baseUrl/listTaskByStatus/Cancelled";
   static const String recoverResetPass = "$baseUrl/RecoverResetPass";
+  static const String profileUpdate = "$baseUrl/profileUpdate";
   // static const
 }
 

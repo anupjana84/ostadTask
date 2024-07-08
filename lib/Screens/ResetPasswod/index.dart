@@ -6,7 +6,7 @@ import 'package:apiinntrigation/Api/index.dart';
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
 
 import 'package:apiinntrigation/Models/response_model.dart';
-import 'package:apiinntrigation/Screens/bottomNavigation/index.dart';
+
 import 'package:apiinntrigation/Screens/login/index.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -167,9 +167,6 @@ class _ResetPassordScreenState extends State<ResetPassordScreen> {
 
     final NetworkResponse response =
         await ApiCall.postApiCall(Api.recoverResetPass, body: data);
-
-    print(response.statusCode);
-    print(response.responseData);
 
     isLoding = false;
 

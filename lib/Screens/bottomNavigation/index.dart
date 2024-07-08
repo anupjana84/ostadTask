@@ -26,7 +26,7 @@ class _BottoNavigationScreenState extends State<BottoNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: constomAppBar(context),
+      appBar: customAppBar(context),
       body: _screen[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

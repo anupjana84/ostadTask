@@ -1,14 +1,25 @@
 import 'package:apiinntrigation/HelperMethod/auth_helper.dart';
+import 'package:apiinntrigation/ProdileUpdate/index.dart';
 import 'package:apiinntrigation/Screens/login/index.dart';
 import 'package:apiinntrigation/Utility/app_color.dart';
 import 'package:flutter/material.dart';
 
-AppBar constomAppBar(context) {
+import 'dart:convert';
+
+AppBar customAppBar(context, [bool fromUpdateProfile = false]) {
   return AppBar(
     centerTitle: false,
     backgroundColor: AppColors.cardColorOne,
     title: GestureDetector(
-      onTap: () {},
+      onTap: () {
+        if (fromUpdateProfile) {
+          return;
+        }
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (builder) => const ProfileUpdateScreen()));
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -26,18 +37,25 @@ AppBar constomAppBar(context) {
     ),
     leading: GestureDetector(
       onTap: () async {
-        AuthHelper.clearUserData();
-        Navigator.pushAndRemoveUntil(
+        if (fromUpdateProfile) {
+          return;
+        }
+        Navigator.push(
             context,
-            MaterialPageRoute(builder: (builder) => const SingInScreen()),
-            (route) => false);
+            MaterialPageRoute(
+                builder: (builder) => const ProfileUpdateScreen()));
       },
-      child: const Padding(
-        padding: EdgeInsets.only(left: 12.0),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 12.0),
         child: CircleAvatar(
-          radius: 50.0,
-          backgroundImage: NetworkImage(
-              'https://images.pexels.com/photos/18681384/pexels-photo-18681384/free-photo-of-gaming.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'), // Replace with your image URL
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: Image.memory(
+              base64Decode(
+                AuthHelper.userData?.photo ?? "",
+              ),
+            ),
+          ),
         ),
       ),
     ),
