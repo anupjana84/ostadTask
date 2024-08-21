@@ -48,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
         MaterialPageRoute(
           builder: (context) => isLogedInUser
               ? const BottoNavigationScreen()
-              : const SingInScreen(),
+              : const LoginScreen(),
         ),
       );
     }

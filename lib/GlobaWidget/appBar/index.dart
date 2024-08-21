@@ -50,11 +50,11 @@ AppBar customAppBar(context, [bool fromUpdateProfile = false]) {
         child: CircleAvatar(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(50),
-            child: Image.memory(
-              base64Decode(
-                AuthHelper.userData?.photo ?? "",
-              ),
-            ),
+            // child: Image.memory(
+            //   base64Decode(
+            //     AuthHelper.userData?.photo ?? "",
+            //   ),
+            // ),
           ),
         ),
       ),
@@ -65,7 +65,7 @@ AppBar customAppBar(context, [bool fromUpdateProfile = false]) {
             AuthHelper.clearUserData();
             Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (builder) => const SingInScreen()),
+                MaterialPageRoute(builder: (builder) => const LoginScreen()),
                 (route) => false);
           },
           icon: const Icon(

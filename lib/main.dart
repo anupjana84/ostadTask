@@ -1,6 +1,9 @@
 import 'package:apiinntrigation/Screens/Splash_screen/index.dart';
+import 'package:apiinntrigation/controller_binding.dart';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/route_manager.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,14 +22,14 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: MyApp.navigatorKey,
-      title: 'Flutter Demo',
       theme: _lightTheme(),
       darkTheme: _dartheme(),
       themeMode: ThemeMode.light,
       home: const SplashScreen(),
+      initialBinding: ControllerBinding(),
     );
   }
 }
@@ -88,4 +91,3 @@ ThemeData _dartheme() {
     ),
   );
 }
-//ffff

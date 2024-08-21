@@ -1,3 +1,4 @@
+import 'package:apiinntrigation/Api/ApiCallViaGetX/forgot_password_controller.dart';
 import 'package:apiinntrigation/Api/api_call.dart';
 import 'package:apiinntrigation/Api/index.dart';
 
@@ -12,6 +13,7 @@ import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
 
 import 'package:apiinntrigation/Utility/app_color.dart';
 import 'package:apiinntrigation/Utility/constants.dart';
+import 'package:get/get.dart';
 
 class FogotPasswordScreen extends StatefulWidget {
   const FogotPasswordScreen({super.key});
@@ -66,23 +68,28 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    Visibility(
-                      visible: isLoding == false,
-                      replacement:
-                          const Center(child: CircularProgressIndicator()),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.cardColorOne,
-                          fixedSize: const Size(double.maxFinite, 45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                    GetBuilder<ForgotPasswordController>(
+                      builder: (forgotPasswordController) {
+                        return Visibility(
+                          visible: forgotPasswordController.isLoding == false,
+                          replacement:
+                              const Center(child: CircularProgressIndicator()),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.cardColorOne,
+                              fixedSize: const Size(double.maxFinite, 45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              _next();
+                            },
+                            child:
+                                const Icon(Icons.arrow_circle_right_outlined),
                           ),
-                        ),
-                        onPressed: () {
-                          _save();
-                        },
-                        child: const Icon(Icons.arrow_circle_right_outlined),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(
                       height: 15,
@@ -122,9 +129,26 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
     );
   }
 
-  _save() {
+  _next() {
     if (_formKey.currentState!.validate()) {
-      _submit();
+      _save();
+    }
+  }
+
+  Future<void> _save() async {
+    final ForgotPasswordController forgotPasswordController =
+        Get.find<ForgotPasswordController>();
+    final url =
+        "${Api.baseUrl}/RecoverVerifyEmail/${_emailTextController.text.trim()}";
+    final bool result = await forgotPasswordController.submit(url);
+    if (result) {
+      Get.off(
+        () => const PinVarificationScreen(),
+      );
+    } else {
+      if (mounted) {
+        // showSnackMessage(context, singInController.errorMessage, true);
+      }
     }
   }
 
@@ -145,14 +169,14 @@ class _FogotPasswordScreenState extends State<FogotPasswordScreen> {
     if (response.isSuccess) {
       _clearFormField();
       if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PinVarificationScreen(
-              email: response.responseData['data']['accepted'][0],
-            ),
-          ),
-        );
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder: (context) => PinVarificationScreen(
+        //       email: response.responseData['data']['accepted'][0],
+        //     ),
+        //   ),
+        // );
       }
     } else {
       if (mounted) {

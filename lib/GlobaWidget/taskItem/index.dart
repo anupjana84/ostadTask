@@ -1,31 +1,42 @@
+import 'dart:async';
+
+import 'package:apiinntrigation/Api/delete_task_controller.dart';
+import 'package:apiinntrigation/Api/index.dart';
+import 'package:apiinntrigation/HelperMethod/imdex.dart';
+import 'package:apiinntrigation/Models/task_item.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter/gestures.dart';
+import 'package:get/get.dart';
 
 class TaskItem extends StatefulWidget {
-  final String title;
-  final Function onClick;
+  // final String title;
+  // final Function onClick;
+  // final Function onUpdate;
   final Function onUpdate;
-  final bool deleLoding;
-  final bool updateLoding;
-  final String id;
+  // final bool deleLoding;
+  // final bool updateLoding;
+  // final String id;
+  // final String id;
+  final TaskItemModel taskItemModel;
 
-  final String description;
-  final String date;
+  // final String description;
+  // final String date;
   final Color color;
   final String buttontitle;
   const TaskItem({
     super.key,
-    required this.title,
-    required this.description,
-    required this.date,
+    required this.taskItemModel,
+    // required this.title,
+    // required this.description,
+    // required this.date,
     required this.color,
     required this.buttontitle,
-    required this.onClick,
-    required this.deleLoding,
-    required this.id,
+    // required this.onClick,
+    // required this.deleLoding,
+    // required this.id,
     required this.onUpdate,
-    required this.updateLoding,
+    // required this.updateLoding,
   });
 
   @override
@@ -39,14 +50,15 @@ class _TaskItemState extends State<TaskItem> {
   @override
   void initState() {
     super.initState();
-    dropdownValue = widget.buttontitle;
+    dropdownValue = widget.taskItemModel.status!;
   }
 
   @override
   Widget build(BuildContext context) {
-    final String truncatedDescription = widget.description.length > 50
-        ? '${widget.description.substring(0, 50)}...'
-        : widget.description;
+    final String truncatedDescription =
+        widget.taskItemModel.description!.length > 50
+            ? '${widget.taskItemModel.description!.substring(0, 50)}...'
+            : widget.taskItemModel.description!;
     return Container(
       height: 180,
       width: double.infinity,
@@ -66,7 +78,7 @@ class _TaskItemState extends State<TaskItem> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10.00),
                     child: Text(
-                      widget.title,
+                      "${widget.taskItemModel.title}",
                       style: const TextStyle(fontSize: 24.00),
                     ),
                   ),
@@ -78,19 +90,21 @@ class _TaskItemState extends State<TaskItem> {
                             text: TextSpan(
                               text: truncatedDescription,
                               style: const TextStyle(color: Colors.black),
-                              children: widget.description.length > 50
-                                  ? [
-                                      TextSpan(
-                                        text: ' Read more',
-                                        style:
-                                            const TextStyle(color: Colors.red),
-                                        recognizer: TapGestureRecognizer()
-                                          ..onTap = () {
-                                            _showDialog(widget.description);
-                                          },
-                                      ),
-                                    ]
-                                  : [],
+                              children:
+                                  widget.taskItemModel.description!.length > 50
+                                      ? [
+                                          TextSpan(
+                                            text: ' Read more',
+                                            style: const TextStyle(
+                                                color: Colors.red),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                _showDialog(widget
+                                                    .taskItemModel.description);
+                                              },
+                                          ),
+                                        ]
+                                      : [],
                             ),
                           ),
                         ],
@@ -98,7 +112,7 @@ class _TaskItemState extends State<TaskItem> {
                   Padding(
                     padding: const EdgeInsets.only(left: 10.0, top: 10.00),
                     child: Text(
-                      "Date ${widget.date}",
+                      "Date ${widget.taskItemModel.createdDate}",
                       style: const TextStyle(
                           fontSize: 16.00, fontWeight: FontWeight.w500),
                     ),
@@ -143,13 +157,14 @@ class _TaskItemState extends State<TaskItem> {
                           Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: Visibility(
-                              visible: widget.updateLoding == false,
+                              visible: true,
                               replacement: const CircularProgressIndicator(),
                               child: PopupMenuButton<String>(
                                 icon: const Icon(Icons.edit),
                                 onSelected: (String selectedValue) {
                                   dropdownValue = selectedValue;
-                                  widget.onUpdate(widget.id, selectedValue);
+                                  _update(
+                                      widget.taskItemModel.sId, selectedValue);
                                   if (mounted) {
                                     setState(() {});
                                   }
@@ -178,7 +193,7 @@ class _TaskItemState extends State<TaskItem> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Visibility(
-                              visible: widget.deleLoding == false,
+                              visible: true,
                               replacement: const Center(
                                   child: CircularProgressIndicator()),
                               child: IconButton(
@@ -187,7 +202,7 @@ class _TaskItemState extends State<TaskItem> {
                                   color: Colors.red,
                                 ),
                                 onPressed: () {
-                                  widget.onClick();
+                                  _deleteTask(widget.taskItemModel.sId);
                                 },
                               ),
                             ),
@@ -229,5 +244,47 @@ class _TaskItemState extends State<TaskItem> {
         );
       },
     );
+  }
+
+  Future<void> _deleteTask(id) async {
+    final DeletedController deletedController = Get.find<DeletedController>();
+
+    final api = "${Api.baseUrl}/deleteTask/$id";
+    final bool result = await deletedController.delstedTask(api);
+    if (result) {
+      if (mounted) {
+        showSnackMessage(context, 'Task Deleted', true);
+
+        Timer(const Duration(seconds: 1), () {
+          // newTaskController.getdata();
+          widget.onUpdate();
+        });
+      }
+    } else {
+      if (mounted) {
+        showSnackMessage(context, 'Delete Task fail ', false);
+      }
+    }
+  }
+
+  Future<void> _update(id, status) async {
+    final DeletedController deletedController = Get.find<DeletedController>();
+
+    final api = "${Api.baseUrl}/updateTaskStatus/$id/$status";
+    final bool result = await deletedController.delstedTask(api);
+    if (result) {
+      if (mounted) {
+        showSnackMessage(context, 'Task Updated', true);
+
+        Timer(const Duration(seconds: 1), () {
+          widget.onUpdate();
+          widget.onUpdate();
+        });
+      }
+    } else {
+      if (mounted) {
+        showSnackMessage(context, 'Update Task fail ', false);
+      }
+    }
   }
 }

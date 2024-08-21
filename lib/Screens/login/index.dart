@@ -1,9 +1,7 @@
-import 'package:apiinntrigation/Api/api_call.dart';
-import 'package:apiinntrigation/Api/index.dart';
-import 'package:apiinntrigation/HelperMethod/auth_helper.dart';
+import 'package:apiinntrigation/Api/ApiCallViaGetX/singin.dart';
+
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
-import 'package:apiinntrigation/Models/auth_data.dart';
-import 'package:apiinntrigation/Models/response_model.dart';
+
 import 'package:apiinntrigation/Screens/bottomNavigation/index.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,14 +11,16 @@ import 'package:apiinntrigation/Screens/register/index.dart';
 import 'package:apiinntrigation/Utility/app_color.dart';
 import 'package:apiinntrigation/Utility/constants.dart';
 
-class SingInScreen extends StatefulWidget {
-  const SingInScreen({super.key});
+import 'package:get/get.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<SingInScreen> createState() => _SingInScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _SingInScreenState extends State<SingInScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailTextController = TextEditingController();
   final TextEditingController _passwordTextController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -75,24 +75,48 @@ class _SingInScreenState extends State<SingInScreen> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    Visibility(
-                      visible: isLoding == false,
-                      replacement:
-                          const Center(child: CircularProgressIndicator()),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.cardColorOne,
-                          fixedSize: const Size(double.maxFinite, 45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+
+                    GetBuilder<SignInController>(
+                      builder: (singInController) {
+                        return Visibility(
+                          visible: singInController.isLoding == false,
+                          replacement:
+                              const Center(child: CircularProgressIndicator()),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.cardColorOne,
+                              fixedSize: const Size(double.maxFinite, 45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              _signIn(singInController);
+                            },
+                            child:
+                                const Icon(Icons.arrow_circle_right_outlined),
                           ),
-                        ),
-                        onPressed: () {
-                          _signIn();
-                        },
-                        child: const Icon(Icons.arrow_circle_right_outlined),
-                      ),
+                        );
+                      },
                     ),
+                    // Visibility(
+                    //   visible: isLoding == false,
+                    //   replacement:
+                    //       const Center(child: CircularProgressIndicator()),
+                    //   child: ElevatedButton(
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: AppColors.cardColorOne,
+                    //       fixedSize: const Size(double.maxFinite, 45),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(10.0),
+                    //       ),
+                    //     ),
+                    //     onPressed: () {
+                    //       _signIn();
+                    //     },
+                    //     child: const Icon(Icons.arrow_circle_right_outlined),
+                    //   ),
+                    // ),
                     const SizedBox(
                       height: 15,
                     ),
@@ -135,65 +159,44 @@ class _SingInScreenState extends State<SingInScreen> {
     );
   }
 
-  _signIn() {
+  Future<void> _signIn(SignInController singInController) async {
     if (_formKey.currentState!.validate()) {
-      _login();
+      _login(singInController);
     }
   }
 
-  Future<void> _login() async {
-    isLoding = true;
-    setState(() {});
-    Map<String, dynamic> loginData = {
-      'email': _emailTextController.text.trim(),
-      'password': _passwordTextController.text,
-    };
-
-    final NetworkResponse response =
-        await ApiCall.postApiCall(Api.login1, body: loginData);
-
-    isLoding = false;
-
-    if (mounted) {
-      setState(() {});
-    }
-
-    if (response.isSuccess) {
-      _clearFormField();
-      AuthModel authModel = AuthModel.fromJson(response.responseData);
-
-      await AuthHelper.userSave(authModel.userModel!);
-      await AuthHelper.tokenSave(authModel.token!);
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const BottoNavigationScreen(),
-          ),
-        );
-      }
+  Future<void> _login(SignInController singInController) async {
+    final bool result = await singInController.signIn(
+      _emailTextController.text.trim(),
+      _passwordTextController.text,
+    );
+    if (result) {
+      Get.off(
+        () => const BottoNavigationScreen(),
+      );
     } else {
       if (mounted) {
-        showSnackMessage(
-            context, response.errorMessage ?? 'Credential wrong', true);
+        showSnackMessage(context, singInController.errorMessage, true);
       }
     }
   }
 
   void _gotToForgotPassworScreen() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const FogotPasswordScreen(),
-        ));
+    Get.to(() => const FogotPasswordScreen());
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) => const FogotPasswordScreen(),
+    //     ));
   }
 
   void _goToSignInButton() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const SignUpScreen(),
-        ));
+    Get.to(() => const SignUpScreen());
+    // Navigator.push(
+    //     context,
+    //     MaterialPageRoute(
+    //       builder: (context) => const SignUpScreen(),
+    //     ));
   }
 
   void _clearFormField() {

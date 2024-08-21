@@ -1,9 +1,15 @@
+import 'dart:async';
+
+import 'package:apiinntrigation/Api/ApiCallViaGetX/new_task_list_controller.dart';
 import 'package:apiinntrigation/Api/api_call.dart';
+import 'package:apiinntrigation/Api/delete_task_controller.dart';
 import 'package:apiinntrigation/Api/index.dart';
 import 'package:apiinntrigation/GlobaWidget/taskItem/index.dart';
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
 import 'package:apiinntrigation/Models/response_model.dart';
-
+import 'package:apiinntrigation/Screens/createNewTask/index.dart';
+import 'package:apiinntrigation/Utility/app_color.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 
@@ -15,28 +21,57 @@ class CancelledTaskScreen extends StatefulWidget {
 }
 
 class _CancelledTaskScreenState extends State<CancelledTaskScreen> {
-  List cancelledTaskList = [];
-
-  bool _isLoding = false;
+  List newTaskList = [];
+  List newTaskListCount = [];
+  bool _isLodingNewTasks = false;
+  bool _isLodingCount = false;
 
   final Map<String, bool> _isLoadingDeleteMap = {};
   final Map<String, bool> _isLoadingUpdateMap = {};
+
   @override
   void initState() {
     super.initState();
-    _getCancleTask();
+    // _getNewTask();
+    // _getTaskCount();
+    _initCall();
   }
 
-  Future<void> _getCancleTask() async {
-    _isLoding = true;
+  _initCall() {
+    Get.find<NewTaskController>().getdata(Api.cancelledTask);
+  }
+
+  Future<void> _getNewTask() async {
+    _isLodingNewTasks = true;
+    setState(() {});
+
+    final NetworkResponse response = await ApiCall.getApiCall(Api.newTasks);
+    print(response.responseData);
+
+    _isLodingNewTasks = false;
+
+    if (mounted) {
+      setState(() {});
+    }
+
+    if (response.isSuccess) {
+    } else {
+      if (mounted) {
+        showSnackMessage(
+            context, response.errorMessage ?? 'Data get Fail', true);
+      }
+    }
+  }
+
+  Future<void> _getTaskCount() async {
+    _isLodingCount = true;
     setState(() {});
 
     final NetworkResponse response =
-        await ApiCall.getApiCall(Api.cancelledTask);
+        await ApiCall.getApiCall(Api.taskStatusCount);
 
-    cancelledTaskList = response.responseData['data'];
-
-    _isLoding = false;
+    newTaskListCount = response.responseData['data'];
+    _isLodingCount = false;
 
     if (mounted) {
       setState(() {});
@@ -56,106 +91,161 @@ class _CancelledTaskScreenState extends State<CancelledTaskScreen> {
     return Scaffold(
       body: Column(
         children: [
+          Container(
+            margin: const EdgeInsets.only(top: 5.00),
+            height: 100,
+            child: _countScrollView(),
+          ),
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async {
-                _getCancleTask();
+                // _getNewTask();
+                // _getTaskCount();
+                _initCall();
               },
-              child: Visibility(
-                visible: _isLoding == false,
-                replacement: const Center(child: CircularProgressIndicator()),
-                child: cancelledTaskList.isEmpty
-                    ? const Center(child: Text('No data found'))
-                    : ListView.builder(
-                        itemCount: cancelledTaskList.length,
-                        itemBuilder: (context, index) {
-                          final item = cancelledTaskList[index];
-                          final parsedDate = DateFormat('dd-MM-yyyy')
-                              .parse(item['createdDate']!);
-                          final formattedDate =
-                              DateFormat('dd/MM/yyyy').format(parsedDate);
-                          return TaskItem(
-                            title: cancelledTaskList[index]['title']
-                                    .toUpperCase() ??
-                                '',
-                            description: cancelledTaskList[index]['description']
-                                    .toUpperCase() ??
-                                '',
-                            date: formattedDate,
-                            color: Colors.red,
-                            buttontitle: 'Cancelled',
-                            onClick: () {
-                              _deleteTask(cancelledTaskList[index]['_id']);
+              child: GetBuilder<NewTaskController>(
+                builder: (newTaskController) {
+                  return Visibility(
+                    visible: newTaskController.isLoding == false,
+                    replacement:
+                        const Center(child: CircularProgressIndicator()),
+                    child: newTaskController.newTaskList.isEmpty
+                        ? const Center(child: Text('No data found'))
+                        : ListView.builder(
+                            itemCount: newTaskController.newTaskList.length,
+                            itemBuilder: (context, index) {
+                              final item = newTaskController.newTaskList[index];
+                              final parsedDate = item.createdDate != null
+                                  ? DateFormat('dd-MM-yyyy')
+                                      .parse(item.createdDate!)
+                                  : DateTime.now();
+                              final formattedDate =
+                                  DateFormat('dd/MM/yyyy').format(parsedDate);
+
+                              return TaskItem(
+                                  taskItemModel:
+                                      newTaskController.newTaskList[index],
+                                  color: AppColors.cardColorOne,
+                                  buttontitle: 'Cancelled',
+                                  onUpdate: _initCall);
                             },
-                            deleLoding: _isLoadingDeleteMap[
-                                    cancelledTaskList[index]['_id']] ??
-                                false,
-                            id: cancelledTaskList[index]['_id'],
-                            onUpdate: _updatStatusTask,
-                            updateLoding: _isLoadingUpdateMap[
-                                    cancelledTaskList[index]['_id']] ??
-                                false,
-                          );
-                        }),
+                          ),
+                  );
+                },
               ),
             ),
           )
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _creatNewTask,
+        backgroundColor: AppColors.cardColorOne,
+        foregroundColor: AppColors.backgroundColorTwo,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30.0),
+        ),
+        child: const Icon(Icons.add),
+      ),
     );
+  }
+
+  _countScrollView() {
+    return Visibility(
+      visible: _isLodingCount == false,
+      replacement: const SizedBox(
+        height: 100,
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+            children: newTaskListCount.map((e) {
+          return SizedBox(
+            width: 100,
+            height: 100,
+            child: Card(
+              elevation: 4,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    e['sum'].toString(),
+                  ),
+                  Text(
+                    e['_id'].toString(),
+                  )
+                ],
+              ),
+            ),
+          );
+        }).toList()),
+      ),
+    );
+  }
+
+  void _creatNewTask() async {
+    Get.to(() => const CreateNewTask());
+    // final result = await Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => const CreateNewTask(),
+    //   ),
+    //);
+
+    // if (result) {
+    //   _getNewTask();
+    //   _getTaskCount();
+    // }
   }
 
   Future<void> _deleteTask(id) async {
     _isLoadingDeleteMap[id] = true;
-    setState(() {});
-
+    final DeletedController deletedController = Get.find<DeletedController>();
+    final NewTaskController newTaskController = Get.find<NewTaskController>();
     final api = "${Api.baseUrl}/deleteTask/$id";
-
-    final NetworkResponse response = await ApiCall.getApiCall(api);
-
-    _isLoadingDeleteMap[id] = false;
-
-    if (mounted) {
-      setState(() {});
-    }
-
-    if (response.isSuccess) {
+    final bool result = await deletedController.delstedTask(api);
+    if (result) {
       if (mounted) {
-        showSnackMessage(context, 'Task Deleted Successfully', false);
-      }
+        showSnackMessage(context, 'Task Deleted', true);
 
-      _getCancleTask();
-    } else {
-      if (mounted) {
-        showSnackMessage(
-            context, response.errorMessage ?? 'Data get Fail', true);
-      }
-    }
-  }
-
-  Future<void> _updatStatusTask(id, status) async {
-    _isLoadingUpdateMap[id] = true;
-    setState(() {});
-    final api = "${Api.baseUrl}/updateTaskStatus/$id/$status";
-
-    final NetworkResponse response = await ApiCall.getApiCall(api);
-
-    _isLoadingUpdateMap[id] = false;
-
-    if (mounted) {
-      setState(() {});
-    }
-
-    if (response.isSuccess) {
-      if (mounted) {
-        showSnackMessage(context, 'Task Updated Successfully', false);
-        _getCancleTask();
+        Timer(const Duration(seconds: 1), () {
+          newTaskController.getdata(Api.cancelledTask);
+        });
       }
     } else {
       if (mounted) {
-        showSnackMessage(
-            context, response.errorMessage ?? 'Data get Fail', true);
+        showSnackMessage(context, 'Delete Task fail ', false);
       }
+    }
+// VOID
+// void _updatStatusTask(){}
+    Future<void> _updatStatusTask(id, status) async {
+      // final DeletedController deletedController =Get.find()
+      // final api = "${Api.baseUrl}/updateTaskStatus/$id/$status";
+
+      // final NetworkResponse response = await ApiCall.getApiCall(api);
+
+      // _isLoadingUpdateMap[id] = false;
+
+      // if (mounted) {
+      //   setState(() {});
+      // }
+
+      // if (response.isSuccess) {
+      //   if (mounted) {
+      //     showSnackMessage(context, 'Task Updated Successfully', false);
+      //     _getNewTask();
+      //     _getTaskCount();
+      //   }
+      // } else {
+      //   if (mounted) {
+      //     showSnackMessage(
+      //         context, response.errorMessage ?? 'Data get Fail', true);
+      //   }
+      // }
     }
   }
 }

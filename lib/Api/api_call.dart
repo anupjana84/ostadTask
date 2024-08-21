@@ -39,6 +39,7 @@ class ApiCall {
 
   static Future<NetworkResponse> postApiCall(String url,
       {Map<String, dynamic>? body}) async {
+    print(AuthHelper.accessToken);
     try {
       Response response = await post(Uri.parse(url),
           body: jsonEncode(body),
@@ -76,7 +77,7 @@ class ApiCall {
     await AuthHelper.clearUserData();
     Navigator.pushAndRemoveUntil(
         MyApp.navigatorKey.currentContext!,
-        MaterialPageRoute(builder: (context) => const SingInScreen()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
         (route) => false);
   }
 }

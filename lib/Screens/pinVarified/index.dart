@@ -1,4 +1,6 @@
+import 'package:apiinntrigation/Api/ApiCallViaGetX/verify_pin_controller.dart';
 import 'package:apiinntrigation/Api/api_call.dart';
+import 'package:apiinntrigation/Api/auth_controller_getx.dart';
 import 'package:apiinntrigation/Api/index.dart';
 
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
@@ -11,15 +13,16 @@ import 'package:flutter/material.dart';
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
 
 import 'package:apiinntrigation/Utility/app_color.dart';
+import 'package:get/get.dart';
 
 import 'package:pin_code_fields/pin_code_fields.dart';
 
 class PinVarificationScreen extends StatefulWidget {
-  final String email;
+  //final String email;
 
   const PinVarificationScreen({
     super.key,
-    required this.email,
+    // required this.email,
   });
 
   @override
@@ -74,23 +77,46 @@ class _PinVarificationScreenState extends State<PinVarificationScreen> {
                         },
                         length: 6),
                     const SizedBox(height: 12),
-                    Visibility(
-                      visible: isLoding == false,
-                      replacement:
-                          const Center(child: CircularProgressIndicator()),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.cardColorOne,
-                          fixedSize: const Size(double.maxFinite, 45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                    // Visibility(
+                    //   visible: isLoding == false,
+                    //   replacement:
+                    //       const Center(child: CircularProgressIndicator()),
+                    //   child: ElevatedButton(
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: AppColors.cardColorOne,
+                    //       fixedSize: const Size(double.maxFinite, 45),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(10.0),
+                    //       ),
+                    //     ),
+                    //     onPressed: () {
+                    //       _save();
+                    //     },
+                    //     child: const Icon(Icons.arrow_circle_right_outlined),
+                    //   ),
+                    // ),
+                    GetBuilder<VerifyPinController>(
+                      builder: (verifyPinController) {
+                        return Visibility(
+                          visible: verifyPinController.isLoding == false,
+                          replacement:
+                              const Center(child: CircularProgressIndicator()),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.cardColorOne,
+                              fixedSize: const Size(double.maxFinite, 45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              _save();
+                            },
+                            child:
+                                const Icon(Icons.arrow_circle_right_outlined),
                           ),
-                        ),
-                        onPressed: () {
-                          _submit();
-                        },
-                        child: const Icon(Icons.arrow_circle_right_outlined),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(
                       height: 15,
@@ -130,40 +156,67 @@ class _PinVarificationScreenState extends State<PinVarificationScreen> {
     );
   }
 
-  Future<void> _submit() async {
-    isLoding = true;
-    setState(() {});
-    final api =
-        "${Api.baseUrl}/RecoverVerifyOTP/${widget.email}/${_pinVarificationController.text.trim()}";
+  Future<void> _save() async {
+    final VerifyPinController verifyPinController =
+        Get.find<VerifyPinController>();
+    final AuthControllerGetx authControllerGetx =
+        Get.find<AuthControllerGetx>();
 
-    final NetworkResponse response = await ApiCall.getApiCall(api);
+    final url =
+        "${Api.baseUrl}/RecoverVerifyOTP/${authControllerGetx.getEmail()}/${_pinVarificationController.text.trim()}";
+    final bool result = await verifyPinController.submit(url);
 
-    isLoding = false;
-
-    if (mounted) {
-      setState(() {});
-    }
-
-    if (response.isSuccess) {
-      // _clearFormField();
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ResetPassordScreen(
-                email: widget.email,
-                otp: _pinVarificationController.text.trim()),
-          ),
-        );
-      }
+    if (result) {
+      authControllerGetx.setopt(_pinVarificationController.text.trim());
+      Get.off(
+        () => ResetPassordScreen(),
+      );
     } else {
       if (mounted) {
-        showSnackMessage(
-            context, response.errorMessage ?? ' Email Send fail', true);
+        showSnackMessage(context, "otp worng", true);
       }
     }
   }
+
+  // Future<void> _submit() async {
+  //   final VerifyPinController verifyPinController =
+  //       Get.find<VerifyPinController>();
+  //   final AuthControllerGetx authControllerGetx =
+  //       Get.find<AuthControllerGetx>();
+  //   isLoding = true;
+  //   setState(() {});
+  //   final api =
+  //       "${Api.baseUrl}/RecoverVerifyOTP/${authControllerGetx.getEmail()}/${_pinVarificationController.text.trim()}";
+
+  //   final NetworkResponse response = await ApiCall.getApiCall(api);
+
+  //   isLoding = false;
+
+  //   if (mounted) {
+  //     setState(() {});
+  //   }
+
+  //   if (response.isSuccess) {
+  //     // _clearFormField();
+
+  //     if (mounted) {
+  //       Navigator.pushReplacement(
+  //         context,
+  //         MaterialPageRoute(
+  //           builder: (context) => ResetPassordScreen(
+  //               // email: widget.email,
+  //               // otp: _pinVarificationController.text.trim()
+  //               ),
+  //         ),
+  //       );
+  //     }
+  //   } else {
+  //     if (mounted) {
+  //       showSnackMessage(
+  //           context, response.errorMessage ?? ' Email Send fail', true);
+  //     }
+  //   }
+  // }
 
   void _goTo() {
     Navigator.pop(context);

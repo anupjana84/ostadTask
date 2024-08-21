@@ -1,3 +1,4 @@
+import 'package:apiinntrigation/Api/ApiCallViaGetX/newtask_create_controller.dart';
 import 'package:apiinntrigation/Api/api_call.dart';
 import 'package:apiinntrigation/Api/index.dart';
 
@@ -10,6 +11,8 @@ import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
 
 import 'package:apiinntrigation/Utility/app_color.dart';
 import 'dart:async';
+
+import 'package:get/get.dart';
 
 class CreateNewTask extends StatefulWidget {
   const CreateNewTask({super.key});
@@ -73,24 +76,27 @@ class _CreateNewTaskState extends State<CreateNewTask> {
                       },
                     ),
                     const SizedBox(height: 12),
-                    Visibility(
-                      visible: isLoding == false,
-                      replacement:
-                          const Center(child: CircularProgressIndicator()),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.cardColorOne,
-                          fixedSize: const Size(double.maxFinite, 45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                    GetBuilder<NewtaskCreateController>(
+                        builder: (newtaskCreateController) {
+                      return Visibility(
+                        visible: newtaskCreateController.isLoding == false,
+                        replacement:
+                            const Center(child: CircularProgressIndicator()),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.cardColorOne,
+                            fixedSize: const Size(double.maxFinite, 45),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
                           ),
+                          onPressed: () {
+                            _onPress();
+                          },
+                          child: const Icon(Icons.arrow_circle_right_outlined),
                         ),
-                        onPressed: () {
-                          _onPress();
-                        },
-                        child: const Icon(Icons.arrow_circle_right_outlined),
-                      ),
-                    ),
+                      );
+                    }),
                     const SizedBox(
                       height: 15,
                     ),
@@ -106,7 +112,7 @@ class _CreateNewTaskState extends State<CreateNewTask> {
 
   _onPress() {
     if (_formKey.currentState!.validate()) {
-      _onSubmit();
+      _save();
     }
   }
 
@@ -141,6 +147,29 @@ class _CreateNewTaskState extends State<CreateNewTask> {
       if (mounted) {
         showSnackMessage(
             context, response.errorMessage ?? 'Data Save Fail', true);
+      }
+    }
+  }
+
+  Future<void> _save() async {
+    final NewtaskCreateController newtaskCreateController =
+        Get.find<NewtaskCreateController>();
+
+    final bool result = await newtaskCreateController.submit(
+        _titleTextController.text.trim(),
+        _descriptionTextController.text,
+        "NEW");
+    print(result);
+    if (result) {
+      if (mounted) {
+        showSnackMessage(context, 'Data Save Successfully', false);
+        Timer(const Duration(seconds: 2), () {
+          Get.back();
+        });
+      }
+    } else {
+      if (mounted) {
+        showSnackMessage(context, 'Data Save fail', true);
       }
     }
   }
