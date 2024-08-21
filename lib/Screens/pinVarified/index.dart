@@ -162,6 +162,7 @@ class _PinVarificationScreenState extends State<PinVarificationScreen> {
     final AuthControllerGetx authControllerGetx =
         Get.find<AuthControllerGetx>();
 
+    print(_pinVarificationController.text);
     final url =
         "${Api.baseUrl}/RecoverVerifyOTP/${authControllerGetx.getEmail()}/${_pinVarificationController.text.trim()}";
     final bool result = await verifyPinController.submit(url);

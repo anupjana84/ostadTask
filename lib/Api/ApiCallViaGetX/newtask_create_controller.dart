@@ -16,11 +16,14 @@ class NewtaskCreateController extends GetxController {
     bool inSuccess = false;
     update();
     Map<String, dynamic> requestDate = {
-      "title": title,
-      "description": description,
-      "status": status
+      // "title": title,
+      // "description": description,
+      // "status": status
+      "title": "My Task anup 2",
+      "description": "My Task 2",
+      "status": "New"
     };
-
+    print(requestDate);
     final NetworkResponse response =
         await ApiCall.postApiCall(Api.newTasks, body: requestDate);
     print(response.statusCode);

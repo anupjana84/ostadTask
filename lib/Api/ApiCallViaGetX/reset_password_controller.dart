@@ -24,9 +24,10 @@ class ResetPasswordController extends GetxController {
 
     Map<String, dynamic> requestDate = {
       "email": email,
-      "otp": otp,
+      "OTP": otp,
       "password": password
     };
+    print(requestDate);
     final NetworkResponse response =
         await ApiCall.postApiCall(Api.recoverResetPass, body: requestDate);
     print(response.responseData);

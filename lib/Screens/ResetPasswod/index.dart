@@ -176,9 +176,9 @@ class _ResetPassordScreenState extends State<ResetPassordScreen> {
   }
 
   _submit() {
-    if (_formKey.currentState!.validate()) {
-      _save();
-    }
+    // if (_formKey.currentState!.validate()) {
+    _save();
+    // }
   }
 
   Future<void> _save() async {

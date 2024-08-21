@@ -116,40 +116,40 @@ class _CreateNewTaskState extends State<CreateNewTask> {
     }
   }
 
-  Future<void> _onSubmit() async {
-    isLoding = true;
-    setState(() {});
-    Map<String, dynamic> submitData = {
-      'title': _titleTextController.text.trim(),
-      'description': _descriptionTextController.text,
-      'status': 'New'
-    };
+  // Future<void> _onSubmit() async {
+  //   isLoding = true;
+  //   setState(() {});
+  //   Map<String, dynamic> submitData = {
+  //     'title': _titleTextController.text.trim(),
+  //     'description': _descriptionTextController.text,
+  //     'status': 'New'
+  //   };
 
-    final NetworkResponse response =
-        await ApiCall.postApiCall(Api.creatTask, body: submitData);
+  //   final NetworkResponse response =
+  //       await ApiCall.postApiCall(Api.creatTask, body: submitData);
 
-    isLoding = false;
+  //   isLoding = false;
 
-    if (mounted) {
-      setState(() {});
-    }
+  //   if (mounted) {
+  //     setState(() {});
+  //   }
 
-    if (response.isSuccess) {
-      _clearFormField();
+  //   if (response.isSuccess) {
+  //     _clearFormField();
 
-      if (mounted) {
-        showSnackMessage(context, 'Data Save Successfully', false);
-        Timer(const Duration(seconds: 2), () {
-          Navigator.pop(context, true);
-        });
-      }
-    } else {
-      if (mounted) {
-        showSnackMessage(
-            context, response.errorMessage ?? 'Data Save Fail', true);
-      }
-    }
-  }
+  //     if (mounted) {
+  //       showSnackMessage(context, 'Data Save Successfully', false);
+  //       Timer(const Duration(seconds: 2), () {
+  //         Navigator.pop(context, true);
+  //       });
+  //     }
+  //   } else {
+  //     if (mounted) {
+  //       showSnackMessage(
+  //           context, response.errorMessage ?? 'Data Save Fail', true);
+  //     }
+  //   }
+  // }
 
   Future<void> _save() async {
     final NewtaskCreateController newtaskCreateController =
