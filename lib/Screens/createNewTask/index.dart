@@ -1,10 +1,6 @@
 import 'package:apiinntrigation/Api/ApiCallViaGetX/newtask_create_controller.dart';
-import 'package:apiinntrigation/Api/api_call.dart';
-import 'package:apiinntrigation/Api/index.dart';
 
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
-
-import 'package:apiinntrigation/Models/response_model.dart';
 
 import 'package:flutter/material.dart';
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
@@ -159,7 +155,7 @@ class _CreateNewTaskState extends State<CreateNewTask> {
         _titleTextController.text.trim(),
         _descriptionTextController.text,
         "NEW");
-    print(result);
+
     if (result) {
       if (mounted) {
         showSnackMessage(context, 'Data Save Successfully', false);
