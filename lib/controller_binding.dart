@@ -6,6 +6,7 @@ import 'package:apiinntrigation/Api/ApiCallViaGetX/singin.dart';
 import 'package:apiinntrigation/Api/ApiCallViaGetX/verify_pin_controller.dart';
 import 'package:apiinntrigation/Api/auth_controller_getx.dart';
 import 'package:apiinntrigation/Api/delete_task_controller.dart';
+import 'package:apiinntrigation/Api/register_controller.dart';
 import 'package:apiinntrigation/Api/update_task_controller.dart';
 import 'package:get/get.dart';
 
@@ -25,5 +26,6 @@ class ControllerBinding extends Bindings {
     Get.put(ForgotPasswordController());
     Get.put(VerifyPinController());
     Get.put(ResetPasswordController());
+    Get.put(RegisterController());
   }
 }

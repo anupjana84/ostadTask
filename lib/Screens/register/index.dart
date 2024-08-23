@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:apiinntrigation/Api/index.dart';
 import 'package:apiinntrigation/Api/api_call.dart';
+import 'package:apiinntrigation/Api/register_controller.dart';
 import 'package:apiinntrigation/GlobaWidget/Background/index.dart';
 import 'package:apiinntrigation/HelperMethod/imdex.dart';
 import 'package:apiinntrigation/Models/response_model.dart';
+import 'package:apiinntrigation/Screens/login/index.dart';
 import 'package:apiinntrigation/Utility/app_color.dart';
 import 'package:apiinntrigation/Utility/constants.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -116,27 +119,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    Visibility(
-                      visible: isLoding == false,
-                      replacement:
-                          const Center(child: CircularProgressIndicator()),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.cardColorOne,
-                          fixedSize: const Size(double.maxFinite, 45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
+                    GetBuilder<RegisterController>(
+                      builder: (registerController) {
+                        return Visibility(
+                          visible: registerController.isLoding == false,
+                          replacement:
+                              const Center(child: CircularProgressIndicator()),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.cardColorOne,
+                              fixedSize: const Size(double.maxFinite, 45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                            ),
+                            onPressed: () {
+                              _register();
+                            },
+                            child: const Icon(
+                              Icons.arrow_circle_right_outlined,
+                              color: Colors.white,
+                            ),
                           ),
-                        ),
-                        onPressed: () {
-                          _register();
-                        },
-                        child: const Icon(
-                          Icons.arrow_circle_right_outlined,
-                          color: Colors.white,
-                        ),
-                      ),
+                        );
+                      },
                     ),
+                    // Visibility(
+                    //   visible: isLoding == false,
+                    //   replacement:
+                    //       const Center(child: CircularProgressIndicator()),
+                    //   child: ElevatedButton(
+                    //     style: ElevatedButton.styleFrom(
+                    //       backgroundColor: AppColors.cardColorOne,
+                    //       fixedSize: const Size(double.maxFinite, 45),
+                    //       shape: RoundedRectangleBorder(
+                    //         borderRadius: BorderRadius.circular(10.0),
+                    //       ),
+                    //     ),
+                    //     onPressed: () {
+                    //       _register();
+                    //     },
+                    //     child: const Icon(
+                    //       Icons.arrow_circle_right_outlined,
+                    //       color: Colors.white,
+                    //     ),
+                    //   ),
+                    // ),
                     const SizedBox(
                       height: 15,
                     ),
@@ -153,7 +181,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void _register() {
     if (_formKey.currentState!.validate()) {
-      _registerApiCall();
+      _save();
+    }
+  }
+
+  Future<void> _save() async {
+    var photo = "";
+    final RegisterController registerController =
+        Get.find<RegisterController>();
+    final bool result = await registerController.submit(
+        _emailTextController.text.trim(),
+        _fNameTextController.text.trim(),
+        _lNameTextController.text.trim(),
+        _phoneTextController.text.trim(),
+        _passwordTextController.text.trim(),
+        photo);
+    if (result) {
+      if (mounted) {
+        showSnackMessage(context, "Register Successfully", false);
+        Timer(const Duration(seconds: 2), () {
+          Get.off(
+            () => const LoginScreen(),
+          );
+        });
+      }
+    } else {
+      if (mounted) {
+        showSnackMessage(context, "Register Fail", true);
+      }
     }
   }
 
